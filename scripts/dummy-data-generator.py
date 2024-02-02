@@ -58,20 +58,29 @@ lots = []
 for row in upc : lots.append(row)
 print(lots)
 
+# First, clear all reports by dummy user
+upc.execute("DELETE FROM reports WHERE user_id = {}".format(dummy_id))
+
 # Generate dummy reports
-add_report = ("INSERT INTO reports "
-              "(user_id, time, lot_id, est_fullness, weight)"
-              "VALUES (%s, %s, %s, %s, %s)")
+# add_report = ("INSERT INTO reports "
+#               "(user_id, time, lot_id, est_fullness, weight)"
+#               "VALUES (%s, %s, %s, %s, %s)")
 
 # set report variables (eventually moved within loops)
 report_time = datetime.datetime.now()
 weight = 1
 user_id = dummy_id
 
-### TODO: This is very slow, need to implement batching
+# Basic batching implemented
+#TODO: Improve batching performance
 
 # For each lot, generate rpl reports
 for lot in lots:
+  add_report_values = ("(%s, %s, %s, %s, %s), " * rpl)[:-2] # remove trailing comma and space
+  add_report = ("INSERT INTO reports "
+                "(user_id, time, lot_id, est_fullness, weight)"
+                "VALUES {}".format(add_report_values))
+  full_lot_report_data = []
   for i in range(rpl):
     # Generate report data
     # Use current time for now, eventually generate rpl different times so each report is unique and can be used to track changes over time
@@ -81,11 +90,14 @@ for lot in lots:
     lot_id = lot[0]
     est_fullness = min(1, max(0, random.gauss(0.75, 0.5))) # random distributed around 0.75, clamped to [0, 1]
     report_data = (user_id, report_time, lot_id, est_fullness, weight)
-    print(report_data)
-    upc.execute(add_report, report_data)
+    # print(report_data)
+    # upc.execute(add_report, report_data)
+    for data in report_data: full_lot_report_data.append(data)
+  upc.execute(add_report, full_lot_report_data)
+
 
 # Check reports
 upc.execute("SELECT * FROM reports WHERE user_id = {}".format(dummy_id))
 for row in upc : print(row)
 
-
+updb.commit()
