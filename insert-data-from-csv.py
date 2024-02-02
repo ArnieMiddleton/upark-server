@@ -43,3 +43,33 @@ Buildings
 #   print("{}, {}, {}, {}, {}, {}".format(bld_id, bld_name, bld_longitude, bld_lattitude, bld_strt_address, created_time))
 
 # updb.commit()
+
+'''
+Lots
+'''
+
+# upc = updb.cursor(buffered=True)
+# data_lots = []
+
+# with open('lots_data_final.csv', newline='\n') as csvfile:
+#   reader = csv.reader(csvfile, delimiter=',')
+#   for row in reader:
+#     data_lots.append((row[0], row[1], row[5], row[6], row[2], datetime.datetime.now())) # lot_id, lot_name, lot_lattitude, lot_longitude, stall_count
+#     print(row)
+#     print(data_lots[-1])
+
+# data_lots.remove(data_lots[0]) # remove the header
+
+# add_lots = ("INSERT INTO lots "
+#             "(lot_id, lot_name, lot_lattitude, lot_longitude, stall_count, car_count, fullness, last_updated)" "VALUES (%s, %s, %s, %s, %s, 0, 0.0, %s)")
+
+# for lot in data_lots:
+#   upc.execute(add_lots, lot)
+
+# query_lots = ("SELECT * FROM lots")
+# upc.execute(query_lots)
+
+# for (lot_id, lot_name, lot_lattitude, lot_longitude, stall_count, last_updated, car_count, fullness) in upc:
+#   print("{}, {}, {}, {}, {}, {}, {}, {}".format(lot_id, lot_name, lot_lattitude, lot_longitude, stall_count, last_updated, car_count, fullness))
+
+# updb.commit()
