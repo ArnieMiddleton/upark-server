@@ -5,6 +5,25 @@ from dotenv import load_dotenv
 import os
 load_dotenv()
 
+app = Flask(__name__)
+# app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+
+print(os.environ.get('dbHost'))
+updb = mysql.connector.connect(
+  host=os.environ.get('dbHost'),
+  user=str(os.environ.get('dbUsername')),
+  password=str(os.environ.get('dbPassword')),
+  database="upark-data"
+)
+print(updb)
+print(updb.is_connected())
+upc = updb.cursor(buffered=True)
+
+if __name__ == "__main__":
+  # app.run(debug=True)
+  app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
+
+
 def rows_to_dict(cursor):
     columns = [column[0] for column in cursor.description]
     results = []
@@ -12,17 +31,11 @@ def rows_to_dict(cursor):
         results.append(dict(zip(columns, row)))
     return results
 
-updb = mysql.connector.connect(
-  host="35.230.20.140",
-  user=str(os.environ.get('dbUsername')),
-  password=str(os.environ.get('dbPassword')),
-  database="upark-data"
-)
-upc = updb.cursor(buffered=True)
-
-app = Flask(__name__)
-
 # "GET" requests
+
+@app.get("/")
+def home():
+  return jsonify("Welcome to the UPark API")
 
 @app.get("/lots")
 def get_lots():
