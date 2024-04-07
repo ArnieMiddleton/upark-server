@@ -17,3 +17,7 @@
 __pycache__/
 # Ignored by the build system
 /setup.cfg
+
+# Exclude locally installed dependencies
+venv/
+.gitignore

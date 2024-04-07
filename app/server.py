@@ -3,16 +3,18 @@ import mysql.connector
 import datetime
 from dotenv import load_dotenv
 import os
+import requests
 load_dotenv()
 
 app = Flask(__name__)
 # app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 
-print(os.environ.get('dbHost'))
+print(os.environ.get('DB_HOST'))
+
 updb = mysql.connector.connect(
-  host=os.environ.get('dbHost'),
-  user=str(os.environ.get('dbUsername')),
-  password=str(os.environ.get('dbPassword')),
+  host=os.environ.get('DB_HOST'),
+  user=str(os.environ.get('DB_USERNAME')),
+  password=str(os.environ.get('DB_PASSWORD')),
   database="upark-data"
 )
 print(updb)
@@ -21,7 +23,7 @@ upc = updb.cursor(buffered=True)
 
 if __name__ == "__main__":
   # app.run(debug=True)
-  app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
+  app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)),ssl_context=('cert.pem', 'key.pem'))
 
 
 def rows_to_dict(cursor):
@@ -32,6 +34,10 @@ def rows_to_dict(cursor):
     return results
 
 # "GET" requests
+
+@app.get("/test")
+def test():
+  return jsonify("Test successful")
 
 @app.get("/")
 def home():

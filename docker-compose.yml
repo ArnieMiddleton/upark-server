@@ -1,0 +1,11 @@
+name: upark-web-app
+
+services:
+  web:
+    container_name: upark-web-app-container
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    env_file: .env

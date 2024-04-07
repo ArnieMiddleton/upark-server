@@ -1,0 +1,1 @@
+web: gunicorn -b :8080 --timeout 0 server:app
