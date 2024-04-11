@@ -91,14 +91,6 @@ def get_username(user_id):
   # print(username)
   return jsonify(username)
 
-@app.get("/user/<string:username>")
-def get_user_id(username):
-  username_query = ("SELECT user_id FROM users WHERE username = %s")
-  upc.execute(username_query, (username,))
-  user_id = upc.fetchone()
-  # print(user_id)
-  return jsonify(user_id)
-
 # "POST" requests
 
 @app.post("/report")
