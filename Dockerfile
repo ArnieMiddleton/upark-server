@@ -15,4 +15,4 @@ RUN pip install -r requirements.txt
 EXPOSE 8080
 
 # Run the server
-CMD gunicorn -b :8082 --timeout 0 -n upark-api -w 8 server:app
+CMD gunicorn -b :8080 --timeout 0 -n upark-api -w 8 server:app
