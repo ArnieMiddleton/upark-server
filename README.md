@@ -12,6 +12,20 @@ To run the server, you need to have credentials to access the database. These mu
 DB_USERNAME = <yourUsername>
 DB_PASSWORD = <yourPassword>
 DB_HOST = <dabaseHost>
+DB_NAME = <databaseName>
+```
+
+## Local Deployment
+To deploy the server locally, you need to have docker installed on your machine. You can install it by following the instructions [here](https://docs.docker.com/get-docker/).
+
+Once you have docker installed, you can run the following commands to build and run the server:
+```
+docker compose build [prod|dev]
+docker compose up [prod|dev]
+```
+This will build the server and run it on your local machine. You can access the server by going to `http://localhost:8080/`. You can stop the server by running the following command:
+```
+docker compose down
 ```
 
 ## GCloud Deployment
