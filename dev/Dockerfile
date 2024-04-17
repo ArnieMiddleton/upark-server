@@ -4,7 +4,7 @@ FROM python:3.11.5-slim
 ENV PYTHONUNBUFFERED 1
 
 # Set the working directory and copy app files
-WORKDIR /upark-web-app-test
+WORKDIR /upark-web-app-dev
 COPY ./app .
 COPY ./gen ./gen
 COPY ./dev/.env .
@@ -17,7 +17,7 @@ RUN pip install -r requirements.txt
 EXPOSE 8081
 
 # Generate data for the database from the production database
-RUN python3 gen/copy-prod-current.py
+RUN python3 gen/copy-prod-dev.py
 RUN python3 gen/gen-dummy-data.py
 
 # Run the server

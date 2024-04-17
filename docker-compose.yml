@@ -17,21 +17,21 @@ services:
     ports:
       - "8081:8081"
     env_file: dev/.env
-  # test:
-  #   container_name: upark-web-app-test-container
-  #   build:
-  #     context: .
-  #     dockerfile: test/Dockerfile
-  #   ports:
-  #     - "8082:8082"
-  #   env_file: test/.env
-  # test-suite:
-  #   container_name: upark-web-app-test-suite-container
-  #   depends_on:
-  #     - "test"
-  #   build:
-  #     context: .
-  #     dockerfile: test/Dockerfile.tests
-  #   env_file: test/.env
+  test:
+    container_name: upark-web-app-test-container
+    build:
+      context: .
+      dockerfile: test/Dockerfile
+    ports:
+      - "8082:8082"
+    env_file: test/.env
+  test-suite:
+    container_name: upark-web-app-test-suite-container
+    depends_on:
+      - "test"
+    build:
+      context: .
+      dockerfile: test/Dockerfile.tests
+    env_file: test/.env
 
 

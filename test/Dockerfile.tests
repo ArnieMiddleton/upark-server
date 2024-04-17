@@ -1,0 +1,18 @@
+FROM python:3.11.5-slim
+
+# Set environment variables
+ENV PYTHONUNBUFFERED 1
+
+
+# Set the working directory and copy app files
+WORKDIR /upark-web-app-test
+COPY ./test ./test
+
+# Install required packages
+COPY requirements.txt ./
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
+
+
+# Run the test suite
+CMD python3 test/test-suite.py
