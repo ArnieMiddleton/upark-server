@@ -8,11 +8,6 @@ import requests
 load_dotenv()
 
 app = Flask(__name__)
-# app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
-
-# print(os.environ.get('DB_HOST'))
-# print(os.environ.get('DB_USERNAME'))
-# print(os.environ.get('DB_NAME'))
 
 updb = mysql.connector.connect(
   host=os.environ.get('DB_HOST'),

@@ -21,4 +21,4 @@ RUN python3 gen/copy-prod-dev.py
 RUN python3 gen/gen-dummy-data.py
 
 # Run the server
-CMD gunicorn -b :8081 --timeout 0 server:app
+CMD gunicorn -b :8082 --timeout 0 -n upark-api -w 8 server:app

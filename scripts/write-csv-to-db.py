@@ -14,7 +14,6 @@ upark_data_upc = upark_data_updb.cursor(buffered=True)
 with open ('data/building.csv', 'r') as f:
   reader = csv.reader(f)
   columns = next(reader)
-  print(columns)
   columns_str = ', '.join(columns)
   values_str = ('%s, ' * len(columns))[0:-2]
   query = 'INSERT INTO building ({0}) VALUES ({1})'.format(columns_str, values_str)
@@ -31,7 +30,6 @@ with open ('data/building.csv', 'r') as f:
 with open('data/lot.csv', 'r') as f:
   reader = csv.reader(f)
   columns = next(reader)
-  print(columns)
   columns_str = ', '.join(columns)
   values_str = ('%s, ' * len(columns))[0:-2]
   query = 'INSERT INTO lot ({0}) VALUES ({1})'.format(columns_str, values_str)

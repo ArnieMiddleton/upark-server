@@ -14,16 +14,22 @@ DB_PASSWORD = <yourPassword>
 DB_HOST = <dabaseHost>
 DB_NAME = <databaseName>
 ```
+These .env files should exist in the `dev`, `test`, and root directories of the project. The `dev` and `test` directories should contain the appropriate credentials for the respective environments. The root directory should contain the credentials for the production environment.
+
+Additionally, `cert.pem` and `key.pem` files should be placed in the root directory of the project. These files are used to secure the connection between the client and the server. They should be generated using the following command:
+```
+openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem -days 365
+```
 
 ## Local Deployment
 To deploy the server locally, you need to have docker installed on your machine. You can install it by following the instructions [here](https://docs.docker.com/get-docker/).
 
 Once you have docker installed, you can run the following commands to build and run the server:
 ```
-docker compose build [prod|dev]
-docker compose up [prod|dev]
+docker compose build [prod|dev|test]
+docker compose up [prod|dev|test]
 ```
-This will build the server and run it on your local machine. You can access the server by going to `http://localhost:8080/`. You can stop the server by running the following command:
+This will build the server and run it on your local machine. You can access the prod server by going to `http://localhost:8080/`. The **prod** server is hosted on port `8080` with **dev** on `8081` and **test** on `8082`. You can stop the server by running the following command:
 ```
 docker compose down
 ```

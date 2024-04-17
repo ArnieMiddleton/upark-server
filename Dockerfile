@@ -14,5 +14,5 @@ RUN pip install -r requirements.txt
 
 EXPOSE 8080
 
-#CMD gunicorn --certfile cert.pem --keyfile key.pem -b :8080 --timeout 0 server:app
-CMD gunicorn -b :8080 --timeout 0 server:app
+# Run the server
+CMD gunicorn -b :8082 --timeout 0 -n upark-api -w 8 server:app
