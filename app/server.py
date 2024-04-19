@@ -101,7 +101,7 @@ def get_reports_by_user(user_id):
   return jsonify(reports)
 
 ### Buildings
-building_base_query = "SELECT id, name, latitude, longitude, street_address FROM building"
+building_base_query = "SELECT id, name, code, latitude, longitude, street_address FROM building"
 
 @app.get("/buildings")
 def get_buildings():
