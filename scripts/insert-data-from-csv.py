@@ -6,11 +6,26 @@ import os
 load_dotenv()
 
 updb = mysql.connector.connect(
-  host="35.230.20.140",
-  user=str(os.environ.get('dbUsername')),
-  password=str(os.environ.get('dbPassword')),
-  database="upark-data"
+  host=str(os.environ.get('DB_HOST')),
+  user=str(os.environ.get('DB_USERNAME')),
+  password=str(os.environ.get('DB_PASSWORD')),
+  database="prd_upark"
 )
+
+'''
+Add building codes
+'''
+
+# upc = updb.cursor(buffered=True)
+# add_building_code = ("UPDATE building SET code = %s WHERE name = %s")
+# with open('data/building_codes.csv', newline='\n') as csvfile:
+#   reader = csv.reader(csvfile, delimiter=',')
+#   for row in reader:
+#     print(row)
+#     upc.execute(add_building_code, (row[1], row[0]))
+#     print(upc.warnings)
+
+# updb.commit()
 
 '''
 Buildings
