@@ -41,7 +41,7 @@ To deploy the server to the Google Cloud Platform, you need to have the appropri
 
 Once you have the appropriate permissions and APIs enabled, you can deploy the server by running the following command:
 ```
-gcloud run deploy
+gcloud run deploy [prod|dev|test]
 ```
 It will then prompt for a code location. Assuming you ran the command from the root of the project, just hit enter. Next, it will prompt for a service name. Use whatever service name you would like for your project. For ours please use 'upark-web-server'. Finally, it will prompt for a region. Use the region that is closest to you. For us, we used 'us-west3'.
 
