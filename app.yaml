@@ -1,8 +1,0 @@
-runtime: python311
-entrypoint: gunicorn --certfile cert.pem --keyfile key.pem -b :8080 server:app
-
-env_variables:
-  SECRET_KEY: "123456"
-  DB_USERNAME: "UParkWebServer"
-  DB_PASSWORD: "FGu7\\vEj/odc{Q-s"
-  DB_HOST: "34.106.243.98"

@@ -13,7 +13,7 @@ updb = mysql.connector.connect(
   host=os.environ.get('DB_HOST'),
   user=str(os.environ.get('DB_USERNAME')),
   password=str(os.environ.get('DB_PASSWORD')),
-  database=str(os.environ.get('DB_NAME')) # TODO: Update gcloud env vars to include DB_NAME
+  database=str(os.environ.get('DB_NAME'))
 )
 
 upc = updb.cursor(buffered=True)
