@@ -9,12 +9,12 @@ load_dotenv()
 
 app = Flask(__name__)
 
-updb = mysql.connector.connect(
-  host=os.environ.get('DB_HOST'),
-  user=str(os.environ.get('DB_USERNAME')),
-  password=str(os.environ.get('DB_PASSWORD')),
-  database=str(os.environ.get('DB_NAME'))
-)
+host = os.environ.get('DB_HOST')
+user = os.environ.get('DB_USERNAME')
+password = os.environ.get('DB_PASSWORD')
+database = os.environ.get('DB_NAME')
+
+databaseName = os.environ.get('DB_NAME').split("_")[0]
 
 
 if __name__ == "__main__":
@@ -37,7 +37,7 @@ def home():
 
 @app.get("/info")
 def info():
-  ret = jsonify(name="Upark API", database=os.environ.get('DB_NAME'))
+  ret = jsonify(name="Upark API", database=databaseName)
   print(ret)
   return ret
 
@@ -46,6 +46,7 @@ lot_base_query = "SELECT id, name, latitude, longitude, car_count, stall_count, 
 
 @app.get("/lots")
 def get_lots():
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
   upc = updb.cursor(buffered=True)
   lot_query = (lot_base_query)
   upc.execute(lot_query)
@@ -55,6 +56,7 @@ def get_lots():
 
 @app.get("/lots/<int:lot_id>")
 def get_lot(lot_id):
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
   upc = updb.cursor(buffered=True)
   lot_query = (lot_base_query + " WHERE id = %s")
   upc.execute(lot_query, (lot_id,))
@@ -77,6 +79,7 @@ report_base_query = "SELECT id, lot_id, latitude, longitude, time, approx_fullne
 
 @app.get("/reports")
 def get_reports():
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
   upc = updb.cursor(buffered=True)
   report_query = (report_base_query)
   upc.execute(report_query)
@@ -86,6 +89,7 @@ def get_reports():
 
 @app.get("/reports/<int:report_id>")
 def get_report(report_id):
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
   upc = updb.cursor(buffered=True)
   report_query = (report_base_query + " WHERE id = %s")
   upc.execute(report_query, (report_id,))
@@ -95,6 +99,7 @@ def get_report(report_id):
 
 @app.get("/reports/lot/<int:lot_id>")
 def get_reports_by_lot(lot_id):
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
   upc = updb.cursor(buffered=True)
   report_query = (report_base_query + " WHERE lot_id = %s")
   upc.execute(report_query, (lot_id,))
@@ -104,6 +109,7 @@ def get_reports_by_lot(lot_id):
 
 @app.get("/reports/user/<int:user_id>")
 def get_reports_by_user(user_id):
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
   upc = updb.cursor(buffered=True)
   report_query = (report_base_query + " WHERE user_id = %s")
   upc.execute(report_query, (user_id,))
@@ -116,6 +122,7 @@ building_base_query = "SELECT id, name, code, latitude, longitude, street_addres
 
 @app.get("/buildings")
 def get_buildings():
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
   upc = updb.cursor(buffered=True)
   building_query = (building_base_query)
   upc.execute(building_query)
@@ -127,6 +134,7 @@ def get_buildings():
 
 @app.get("/users/<int:user_id>")
 def get_username(user_id):
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
   upc = updb.cursor(buffered=True)
   user_id_query = ("SELECT name, colorblind FROM user WHERE id = %s")
   upc.execute(user_id_query, (user_id,))
@@ -138,6 +146,7 @@ def get_username(user_id):
 
 @app.post("/report")
 def post_report():
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
   upc = updb.cursor(buffered=True)
   print(request.json)
   user_id = request.json['user_id']
@@ -153,6 +162,7 @@ def post_report():
   return "Report added"
 
 def update_lot_fullness(lot_id):
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
   upc = updb.cursor(buffered=True)
   # Get lot information
   lot_query = (lot_base_query + " WHERE id = %s")
