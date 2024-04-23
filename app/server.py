@@ -107,7 +107,7 @@ def get_reports_by_lot(lot_id):
   # print(reports)
   return jsonify(reports)
 
-@app.get("/reports/user/<int:user_id>")
+@app.get("/reports/user/<string:user_id>")
 def get_reports_by_user(user_id):
   updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
   upc = updb.cursor(buffered=True)
@@ -138,9 +138,9 @@ def get_user(user_id):
   upc = updb.cursor(buffered=True)
   user_query = ("SELECT id, name, colorblind FROM user WHERE id = %s LIMIT 1")
   upc.execute(user_query, (user_id,))
-  users = rows_to_dict(upc).pop()
-  print(users)
-  return jsonify(users)
+  fetched_user = rows_to_dict(upc).pop()
+  print(fetched_user)
+  return jsonify(fetched_user)
 
 # "POST" requests
 
@@ -149,25 +149,37 @@ def post_report():
   updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
   upc = updb.cursor(buffered=True)
   print(request.json)
-  user_id = request.json['user_id']
-  time = request.json['time']
-  lot_id = request.json['lot_id']
-  longitude = request.json['longitude']
-  latitude = request.json['latitude']
-  approx_fullness = request.json['approx_fullness']
-  report_query = ("INSERT INTO report (user_id, lot_id, longitude, latitude, time, approx_fullness) VALUES (%s, %s, %s, %s, %s, %s)")
-  upc.execute(report_query, (user_id, lot_id, longitude, latitude, time, approx_fullness))
-  updb.commit()
+  try:
+    user_id = request.json['user_id']
+    time = request.json['time']
+    lot_id = request.json['lot_id']
+    longitude = request.json['longitude']
+    latitude = request.json['latitude']
+    approx_fullness = request.json['approx_fullness']
+  except Exception as e:
+    print("Error in converting request to json: " + str(e))
+    return "Error in converting request to json"
+  try:
+    report_query = ("INSERT INTO report (user_id, lot_id, longitude, latitude, time, approx_fullness) VALUES (%s, %s, %s, %s, %s, %s)")
+    upc.execute(report_query, (user_id, lot_id, longitude, latitude, time, approx_fullness))
+    print("Report added: " + str(upc.lastrowid))
+    print("Report result: " + str(upc.warnings))
+    updb.commit()
+  except Exception as e:
+    print("Error in adding report: " + str(e))
+    return "Error in adding report"
   update_lot_fullness(lot_id)
   return "Report added"
 
+
+#id, name, latitude, longitude, car_count, stall_count, last_updated, enabled
 def update_lot_fullness(lot_id):
   updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
   upc = updb.cursor(buffered=True)
   # Get lot information
   lot_query = (lot_base_query + " WHERE id = %s")
   upc.execute(lot_query, (lot_id,))
-  lot = upc.fetchone()
+  lot = rows_to_dict(upc).pop()
   if lot == None:
     return "Lot not found"
   lot_name = lot["name"]
@@ -176,12 +188,12 @@ def update_lot_fullness(lot_id):
   last_fullness = last_car_count / stall_count
   last_updated = lot["last_updated"]
   time_diff = datetime.datetime.now() - last_updated
-  time_diff_hours = time_diff.total_hours()
+  # time_diff_hours = time_diff.total_hours()
 
   # Get last 3 reports
   reports_query = (report_base_query + " WHERE lot_id = %s ORDER BY time DESC limit 3")
   upc.execute(reports_query, (lot_id,))
-  reports = upc.fetchall()
+  reports = rows_to_dict(upc)
   if len(reports) == 0:
     return "No reports found"
   # TODO: Add more complex moving average algorithm
