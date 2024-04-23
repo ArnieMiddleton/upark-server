@@ -51,7 +51,7 @@ def get_lots():
   lot_query = (lot_base_query)
   upc.execute(lot_query)
   lots = rows_to_dict(upc)
-  print(lots)
+  # print(lots)
   return jsonify(lots)
 
 @app.get("/lots/<int:lot_id>")
@@ -132,15 +132,15 @@ def get_buildings():
 
 ### Users
 
-@app.get("/users/<int:user_id>")
-def get_username(user_id):
+@app.get("/users/<string:user_id>")
+def get_user(user_id):
   updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
   upc = updb.cursor(buffered=True)
-  user_id_query = ("SELECT name, colorblind FROM user WHERE id = %s")
-  upc.execute(user_id_query, (user_id,))
-  username = upc.fetchone()
-  # print(username)
-  return jsonify(username)
+  user_query = ("SELECT id, name, colorblind FROM user WHERE id = %s LIMIT 1")
+  upc.execute(user_query, (user_id,))
+  users = rows_to_dict(upc).pop()
+  print(users)
+  return jsonify(users)
 
 # "POST" requests
 
