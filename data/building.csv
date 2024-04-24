@@ -1,4 +1,4 @@
-id,name,longitude,latitude,street_address,enabled
+id,name,latitude,longitude,street_address,enabled
 16,Campus Bike Shop,40.7605800000000000,-111.8428220000000000,1628 E Campus Center Dr,1
 39,S.J. Quinney College of Law,40.7612210000000000,-111.8514450000000000,383 S University St,1
 40,Mineral Processing Lab,40.7665170000000000,-111.8448860000000000,126 S Central Campus Dr,1
