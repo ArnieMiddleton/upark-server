@@ -175,7 +175,35 @@ def get_user(user_id):
   print(fetched_user)
   return jsonify(fetched_user)
 
-# "POST" requests
+@app.put("/user/setColorblind")
+def set_colorblind():
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
+  upc = updb.cursor(buffered=True)
+  try:
+    user_id = request.json['id']
+    colorblind = request.json['colorblind']
+  except Exception as e:
+    print("Error in converting request to json: " + str(e))
+    return "Error in converting request to json"
+  user_query = ("UPDATE user SET colorblind = %s WHERE id = %s")
+  upc.execute(user_query, (colorblind, user_id))
+  updb.commit()
+  return "Colorblind setting updated to " + str(colorblind)
+
+@app.post("/user/add")
+def add_user():
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
+  upc = updb.cursor(buffered=True)
+  try:
+    user_id = request.json['id']
+    name = request.json['name']
+  except Exception as e:
+    print("Error in converting request to json: " + str(e))
+    return "Error in converting request to json"
+  user_query = ("INSERT INTO user (id, name) VALUES (%s, %s)")
+  upc.execute(user_query, (user_id, name))
+  updb.commit()
+  return get_user(user_id)
 
 @app.post("/report")
 def post_report():
