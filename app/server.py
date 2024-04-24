@@ -130,6 +130,39 @@ def get_buildings():
   # print(buildings)
   return jsonify(buildings)
 
+### Distances
+@app.get("/distances/lot/<int:lot_id>/<int:limit>")
+def get_distances_by_lot(lot_id, limit):
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
+  upc = updb.cursor(buffered=True)
+  query = ('SELECT id, distance FROM building JOIN building_lot_distance ON id=building_id WHERE lot_id=%s ORDER BY distance LIMIT %s;')
+  upc.execute(query, (lot_id, limit))
+  return jsonify(rows_to_dict(upc))
+
+@app.get("/distances/building/<int:bld_id>/<int:limit>")
+def get_distances_by_building(bld_id, limit):
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
+  upc = updb.cursor(buffered=True)
+  query = ('SELECT id, distance FROM lot JOIN building_lot_distance on id=lot_id WHERE building_id=%s ORDER BY distance LIMIT %s;')
+  upc.execute(query, (bld_id, limit))
+  return jsonify(rows_to_dict(upc))
+
+@app.get("/distances/both/<int:bld_id>/<int:lot_id>")
+def get_distances_by_both(bld_id, lot_id):
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
+  upc = updb.cursor(buffered=True)
+  query = ('SELECT lot_id, building_id, distance FROM building_lot_distance WHERE building_id=%s AND lot_id=%s;')
+  upc.execute(query, (bld_id, lot_id))
+  return jsonify(rows_to_dict(upc))
+
+@app.get("/distances")
+def get_distances():
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
+  upc = updb.cursor(buffered=True)
+  query = ('SELECT lot_id, building_id, distance FROM building_lot_distance;')
+  upc.execute(query)
+  return jsonify(rows_to_dict(upc))
+
 ### Users
 
 @app.get("/users/<string:user_id>")
