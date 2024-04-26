@@ -1,25 +1,21 @@
 from flask import Flask, request, jsonify
 import mysql.connector
 import datetime
+import math
 from dotenv import load_dotenv
 import os
 import requests
 load_dotenv()
 
 app = Flask(__name__)
-# app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 
-print(os.environ.get('DB_HOST'))
+host = os.environ.get('DB_HOST')
+user = os.environ.get('DB_USERNAME')
+password = os.environ.get('DB_PASSWORD')
+database = os.environ.get('DB_NAME')
 
-updb = mysql.connector.connect(
-  host=os.environ.get('DB_HOST'),
-  user=str(os.environ.get('DB_USERNAME')),
-  password=str(os.environ.get('DB_PASSWORD')),
-  database="upark-data"
-)
-print(updb)
-print(updb.is_connected())
-upc = updb.cursor(buffered=True)
+databaseName = os.environ.get('DB_NAME').split("_")[0]
+
 
 if __name__ == "__main__":
   # app.run(debug=True)
@@ -35,17 +31,24 @@ def rows_to_dict(cursor):
 
 # "GET" requests
 
-@app.get("/test")
-def test():
-  return jsonify("Test successful")
-
 @app.get("/")
 def home():
   return jsonify("Welcome to the UPark API")
 
+@app.get("/info")
+def info():
+  ret = jsonify(name="Upark API", database=databaseName)
+  print(ret)
+  return ret
+
+### Lots
+lot_base_query = "SELECT id, name, latitude, longitude, car_count, stall_count, last_updated, enabled FROM lot"
+
 @app.get("/lots")
 def get_lots():
-  lot_query = ("SELECT lot_id, lot_name, lot_lattitude, lot_longitude, stall_count FROM lots")
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
+  upc = updb.cursor(buffered=True)
+  lot_query = (lot_base_query)
   upc.execute(lot_query)
   lots = rows_to_dict(upc)
   # print(lots)
@@ -53,89 +56,213 @@ def get_lots():
 
 @app.get("/lots/<int:lot_id>")
 def get_lot(lot_id):
-  lot_query = ("SELECT lot_id, lot_name, lot_lattitude, lot_longitude, stall_count FROM lots WHERE lot_id = %s")
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
+  upc = updb.cursor(buffered=True)
+  lot_query = (lot_base_query + " WHERE id = %s")
   upc.execute(lot_query, (lot_id,))
   lot = upc.fetchone()
   # print(lot)
   return jsonify(lot)
 
+'''
 @app.get("/lots/<string:lot_name>")
 def get_lot_id(lot_name):
-  lot_query = ("SELECT lot_id FROM lots WHERE lot_name = %s")
+  lot_query = (lot_base_query + " WHERE lot_name = %s")
   upc.execute(lot_query, (lot_name,))
   lot_id = upc.fetchone()
   # print(lot_id)
   return jsonify(lot_id)
+'''
+
+### Reports
+report_base_query = "SELECT id, lot_id, latitude, longitude, time, approx_fullness, weight FROM report"
 
 @app.get("/reports")
 def get_reports():
-  report_query = ("SELECT report_id, time, lot_id, est_fullness, weight FROM reports")
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
+  upc = updb.cursor(buffered=True)
+  report_query = (report_base_query)
   upc.execute(report_query)
   reports = rows_to_dict(upc)
   # print(reports)
   return jsonify(reports)
 
+@app.get("/reports/<int:report_id>")
+def get_report(report_id):
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
+  upc = updb.cursor(buffered=True)
+  report_query = (report_base_query + " WHERE id = %s")
+  upc.execute(report_query, (report_id,))
+  report = upc.fetchone()
+  # print(report)
+  return jsonify(report)
+
+@app.get("/reports/lot/<int:lot_id>")
+def get_reports_by_lot(lot_id):
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
+  upc = updb.cursor(buffered=True)
+  report_query = (report_base_query + " WHERE lot_id = %s")
+  upc.execute(report_query, (lot_id,))
+  reports = rows_to_dict(upc)
+  # print(reports)
+  return jsonify(reports)
+
+@app.get("/reports/user/<string:user_id>")
+def get_reports_by_user(user_id):
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
+  upc = updb.cursor(buffered=True)
+  report_query = (report_base_query + " WHERE user_id = %s")
+  upc.execute(report_query, (user_id,))
+  reports = rows_to_dict(upc)
+  # print(reports)
+  return jsonify(reports)
+
+### Buildings
+building_base_query = "SELECT id, name, code, latitude, longitude, street_address FROM building"
+
 @app.get("/buildings")
 def get_buildings():
-  building_query = ("SELECT bld_id, bld_name, bld_longitude, bld_lattitude, bld_strt_address FROM buildings")
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
+  upc = updb.cursor(buffered=True)
+  building_query = (building_base_query)
   upc.execute(building_query)
   buildings = rows_to_dict(upc)
   # print(buildings)
   return jsonify(buildings)
 
-@app.get("/user/<int:user_id>")
-def get_username(user_id):
-  user_id_query = ("SELECT username FROM users WHERE user_id = %s")
-  upc.execute(user_id_query, (user_id,))
-  username = upc.fetchone()
-  # print(username)
-  return jsonify(username)
+### Distances
+@app.get("/distances/lot/<int:lot_id>/<int:limit>")
+def get_distances_by_lot(lot_id, limit):
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
+  upc = updb.cursor(buffered=True)
+  query = ('SELECT id, distance FROM building JOIN building_lot_distance ON id=building_id WHERE lot_id=%s ORDER BY distance LIMIT %s;')
+  upc.execute(query, (lot_id, limit))
+  return jsonify(rows_to_dict(upc))
 
-@app.get("/user/<string:username>")
-def get_user_id(username):
-  username_query = ("SELECT user_id FROM users WHERE username = %s")
-  upc.execute(username_query, (username,))
-  user_id = upc.fetchone()
-  # print(user_id)
-  return jsonify(user_id)
+@app.get("/distances/building/<int:bld_id>/<int:limit>")
+def get_distances_by_building(bld_id, limit):
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
+  upc = updb.cursor(buffered=True)
+  query = ('SELECT id, distance FROM lot JOIN building_lot_distance on id=lot_id WHERE building_id=%s ORDER BY distance LIMIT %s;')
+  upc.execute(query, (bld_id, limit))
+  return jsonify(rows_to_dict(upc))
 
-# "POST" requests
+@app.get("/distances/both/<int:bld_id>/<int:lot_id>")
+def get_distances_by_both(bld_id, lot_id):
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
+  upc = updb.cursor(buffered=True)
+  query = ('SELECT lot_id, building_id, distance FROM building_lot_distance WHERE building_id=%s AND lot_id=%s;')
+  upc.execute(query, (bld_id, lot_id))
+  return jsonify(rows_to_dict(upc))
+
+@app.get("/distances")
+def get_distances():
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
+  upc = updb.cursor(buffered=True)
+  query = ('SELECT lot_id, building_id, distance FROM building_lot_distance;')
+  upc.execute(query)
+  return jsonify(rows_to_dict(upc))
+
+### Users
+
+@app.get("/users/<string:user_id>")
+def get_user(user_id):
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
+  upc = updb.cursor(buffered=True)
+  user_query = ("SELECT id, name, colorblind FROM user WHERE id = %s LIMIT 1")
+  upc.execute(user_query, (user_id,))
+  fetched_user = rows_to_dict(upc).pop()
+  print(fetched_user)
+  return jsonify(fetched_user)
+
+@app.put("/user/setColorblind")
+def set_colorblind():
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
+  upc = updb.cursor(buffered=True)
+  try:
+    user_id = request.json['id']
+    colorblind = request.json['colorblind']
+  except Exception as e:
+    print("Error in converting request to json: " + str(e))
+    return "Error in converting request to json"
+  user_query = ("UPDATE user SET colorblind = %s WHERE id = %s")
+  upc.execute(user_query, (colorblind, user_id))
+  updb.commit()
+  return "Colorblind setting updated to " + str(colorblind)
+
+@app.post("/user/add")
+def add_user():
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
+  upc = updb.cursor(buffered=True)
+  try:
+    user_id = request.json['id']
+    name = request.json['name']
+  except Exception as e:
+    print("Error in converting request to json: " + str(e))
+    return "Error in converting request to json"
+  user_query = ("INSERT INTO user (id, name) VALUES (%s, %s)")
+  upc.execute(user_query, (user_id, name))
+  updb.commit()
+  return get_user(user_id)
 
 @app.post("/report")
 def post_report():
-  user_id = request.json['user_id']
-  time = request.json['time']
-  lot_id = request.json['lot_id']
-  est_fullness = request.json['est_fullness']
-  report_query = ("INSERT INTO reports (user_id, time, lot_id, est_fullness, weight) VALUES (%s, %s, %s, %s, %s)")
-  upc.execute(report_query, (user_id, time, lot_id, est_fullness, 1))
-  updb.commit()
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
+  upc = updb.cursor(buffered=True)
+  print(request.json)
+  try:
+    user_id = request.json['user_id']
+    time = request.json['time']
+    lot_id = request.json['lot_id']
+    longitude = request.json['longitude']
+    latitude = request.json['latitude']
+    approx_fullness = request.json['approx_fullness']
+  except Exception as e:
+    print("Error in converting request to json: " + str(e))
+    return "Error in converting request to json"
+  try:
+    report_query = ("INSERT INTO report (user_id, lot_id, longitude, latitude, time, approx_fullness) VALUES (%s, %s, %s, %s, %s, %s)")
+    upc.execute(report_query, (user_id, lot_id, longitude, latitude, time, approx_fullness))
+    print("Report added: " + str(upc.lastrowid))
+    print("Report result: " + str(upc.warnings))
+    updb.commit()
+  except Exception as e:
+    print("Error in adding report: " + str(e))
+    return "Error in adding report"
   update_lot_fullness(lot_id)
   return "Report added"
 
+
+#id, name, latitude, longitude, car_count, stall_count, last_updated, enabled
 def update_lot_fullness(lot_id):
-  lot_query = ("SELECT lot_name, stall_count, car_count, fullness, last_updated FROM lots WHERE lot_id = %s")
+  updb = mysql.connector.connect(host=host, user=user, password=password, database=database)
+  upc = updb.cursor(buffered=True)
+  # Get lot information
+  lot_query = (lot_base_query + " WHERE id = %s")
   upc.execute(lot_query, (lot_id,))
-  lot = upc.fetchone()
+  lot = rows_to_dict(upc).pop()
   if lot == None:
     return "Lot not found"
-  lot_name = lot[0]
-  stall_count = lot[1]
-  last_car_count = lot[2]
-  last_fullness = lot[3]
-  last_updated = lot[4]
+  lot_name = lot["name"]
+  stall_count = lot["stall_count"]
+  last_car_count = lot["car_count"]
+  last_fullness = last_car_count / stall_count
+  last_updated = lot["last_updated"]
   time_diff = datetime.datetime.now() - last_updated
-  time_diff_hours = time_diff.total_hours()
-  # TODO: Add more complex moving average algorithm
-  reports_query = ("SELECT est_fullness FROM reports ORDER BY time DESC limit 3 WHERE lot_id = %s")
-  upc.execute(reports_query)
-  reports = upc.fetchall()
+  # time_diff_hours = time_diff.total_hours()
+
+  # Get last 3 reports
+  reports_query = (report_base_query + " WHERE lot_id = %s ORDER BY time DESC limit 3")
+  upc.execute(reports_query, (lot_id,))
+  reports = rows_to_dict(upc)
   if len(reports) == 0:
     return "No reports found"
-  est_fullness = sum(reports) / len(reports) # simple average of last 3 reports
-  car_count = est_fullness * stall_count
+  # TODO: Add more complex moving average algorithm
+  approx_fullness = sum([report["approx_fullness"] for report in reports]) / len(reports) # simple average of last 3 reports
+  car_count = math.floor(approx_fullness * stall_count)
+
   # Update lot
-  update_query = ("UPDATE lots SET car_count = %s, fullness = %s, last_updated = %s WHERE lot_id = %s")
-  upc.execute(update_query, (car_count, est_fullness, datetime.datetime.now(), lot_id))
+  update_query = ("UPDATE lot SET car_count = %s, last_updated = %s WHERE id = %s")
+  upc.execute(update_query, (car_count, datetime.datetime.now(), lot_id))
   updb.commit()
-  return "Lot updated"
+  return "Lot {lot_name} ({lot_id}) updated to {car_count} cars ({approx_fullness} fullness) from {last_car_count} cars ({last_fullness} fullness) over {time_diff_hours} hours"
